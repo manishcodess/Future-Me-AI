@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles } from 'lucide-react';
+import { Send, Bot } from 'lucide-react';
 import { GoogleGenAI } from '@google/genai';
 
 // Initialize Gemini API
@@ -595,7 +595,7 @@ function App() {
   return (
     <div className="app-container">
       <header className="app-header">
-        <h1 className="app-title">FutureYou <Sparkles className="inline-block ml-2 text-blue-400" size={24} /></h1>
+        <h1 className="app-title">Future Me-AI<Bot className="inline-block ml-2" size={22} /></h1>
         <p className="app-tagline">Ask your successful older self for guidance.</p>
       </header>
 
@@ -612,7 +612,7 @@ function App() {
         
         {isLoading && (
           <div className="message-wrapper ai">
-            <div className="message ai" style={{ padding: '0.8rem 1.25rem' }}>
+            <div className="message ai">
               <div className="typing-indicator">
                 <span className="typing-dot"></span>
                 <span className="typing-dot"></span>
