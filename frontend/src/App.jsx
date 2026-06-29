@@ -40,6 +40,7 @@ function App() {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -391,17 +392,17 @@ function App() {
   useEffect(() => {
     scrollToBottom();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages, isLoading, activeTab]);
+  }, [messages, isLoading, isStreaming, activeTab]);
 
   const submitMessage = async (userMessage) => {
-    if (!userMessage.trim() || isLoading) return;
+    if (!userMessage.trim() || isLoading || isStreaming) return;
 
     const userTimestamp = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
     setMessages((prev) => [...prev, { role: 'user', content: userMessage, timestamp: userTimestamp }]);
     setIsLoading(true);
 
     try {
-      const response = await ai.models.generateContent({
+      const responseStream = await ai.models.generateContentStream({
         model: "gemini-3.1-flash-lite",
         contents: userMessage,
         config: {
@@ -409,11 +410,36 @@ function App() {
         },
       });
 
+      let fullText = '';
+      let isFirstChunk = true;
       const aiTimestamp = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-      setMessages((prev) => [
-        ...prev,
-        { role: 'ai', content: response.text, timestamp: aiTimestamp }
-      ]);
+
+      for await (const chunk of responseStream) {
+        if (isFirstChunk) {
+          setIsLoading(false);
+          setIsStreaming(true);
+          isFirstChunk = false;
+          setMessages((prev) => [
+            ...prev,
+            { role: 'ai', content: '', timestamp: aiTimestamp }
+          ]);
+        }
+        
+        const text = chunk.text;
+        for (let i = 0; i < text.length; i++) {
+          fullText += text[i];
+          setMessages((prev) => {
+            const newMessages = [...prev];
+            newMessages[newMessages.length - 1] = { 
+              ...newMessages[newMessages.length - 1],
+              content: fullText 
+            };
+            return newMessages;
+          });
+          // 15ms delay per character for a "medium" reading speed
+          await new Promise(r => setTimeout(r, 15));
+        }
+      }
     } catch (error) {
       setMessages((prev) => [
         ...prev,
@@ -421,6 +447,7 @@ function App() {
       ]);
     } finally {
       setIsLoading(false);
+      setIsStreaming(false);
     }
   };
 
@@ -593,7 +620,7 @@ function App() {
                   <div className="suggested-prompts-container">
                     <div className="suggested-prompts">
                       {SUGGESTED_PROMPTS.map((prompt, i) => (
-                        <button key={i} className="prompt-chip" onClick={() => handleSuggestedPrompt(prompt)} disabled={isLoading}>
+                        <button key={i} className="prompt-chip" onClick={() => handleSuggestedPrompt(prompt)} disabled={isLoading || isStreaming}>
                           {prompt}
                         </button>
                       ))}
@@ -624,9 +651,9 @@ function App() {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Ask your future self..."
-                    disabled={isLoading}
+                    disabled={isLoading || isStreaming}
                   />
-                  <button type="submit" className="send-btn" disabled={!input.trim() || isLoading}>
+                  <button type="submit" className="send-btn" disabled={!input.trim() || isLoading || isStreaming}>
                     <Send size={18} />
                   </button>
                 </form>
