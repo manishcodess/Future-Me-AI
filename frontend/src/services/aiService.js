@@ -4,8 +4,10 @@ export const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY 
 
 export function buildSystemPrompt(githubData, leetcodeData, gfgData, userCredentials) {
   const userName = userCredentials?.name?.split(' ')[0] || "User";
-  return `You are DevPulse — an AI developer coach and mentor for ${userName}.
+  const userBio = userCredentials?.bio ? `\n  USER'S CUSTOM INSTRUCTIONS / BIO:\n  "${userCredentials.bio}"\n  (Use the above information to personalize your interactions and adapt your mentoring style to this person.)\n` : "";
   
+  return `You are DevPulse — an AI developer coach and mentor for ${userName}.
+  ${userBio}
   ${userName.toUpperCase()}'S REAL-TIME PROFILE:
   - LeetCode: ${leetcodeData?.total ?? 'unknown'} problems solved
     Easy: ${leetcodeData?.easy ?? '?'} | Medium: ${leetcodeData?.medium ?? '?'} | Hard: ${leetcodeData?.hard ?? '?'}

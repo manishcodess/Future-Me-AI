@@ -1,14 +1,21 @@
 import React from 'react';
-import { Zap, ExternalLink } from 'lucide-react';
+import { Zap, ExternalLink, Menu } from 'lucide-react';
 
-export default function LeftPanel({ isPanelOpen, githubData, leetcodeData, gfgData, userCredentials }) {
+export default function LeftPanel({ isPanelOpen, setIsPanelOpen, githubData, leetcodeData, gfgData, userCredentials }) {
   return (
     <aside className={`left-panel ${!isPanelOpen ? 'closed' : ''}`}>
-      <div className="sidebar-logo-container">
-        <div className="logo-icon-bg">
-          <Zap size={20} color="#ffffff" />
+      <div style={{ display: 'flex', flexDirection: isPanelOpen ? 'row' : 'column-reverse', alignItems: 'center', justifyContent: isPanelOpen ? 'space-between' : 'center', gap: isPanelOpen ? '0' : '16px', padding: isPanelOpen ? '16px' : '16px 0', borderBottom: '1px solid var(--border-subtle)', minHeight: '72px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div className="logo-icon-bg">
+            <Zap size={20} color="#ffffff" />
+          </div>
+          {isPanelOpen && (
+            <span className="logo-text" style={{ fontSize: '18px', fontWeight: 'bold' }}>DevPulse</span>
+          )}
         </div>
-        <span className="logo-text">DevPulse</span>
+        <button onClick={() => setIsPanelOpen(!isPanelOpen)} style={{ background: 'var(--surface-1)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px', transition: 'all 0.2s ease' }}>
+          <Menu size={20} />
+        </button>
       </div>
 
       <div className="user-profile-card">
@@ -43,7 +50,7 @@ export default function LeftPanel({ isPanelOpen, githubData, leetcodeData, gfgDa
               <div className="dev-stats-grid">
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Commits</span>
-                  <span style={{ fontSize: '16px', fontWeight: 'bold' }}>{githubData.totalCommits}</span>
+                  <span style={{ fontSize: '16px', fontWeight: 'bold', color: 'green' }}>{githubData.totalCommits}</span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Repositories</span>
@@ -76,7 +83,7 @@ export default function LeftPanel({ isPanelOpen, githubData, leetcodeData, gfgDa
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-              <span style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--text-primary)', letterSpacing: '-1px' }}>
+              <span style={{ fontSize: '32px', fontWeight: 'bold', color:'green' , letterSpacing: '-1px' }}>
                 {(leetcodeData?.total ?? 0) + (gfgData?.total ?? 0)}
               </span>
               <span style={{ fontSize: '15px', color: 'var(--text-muted)' }}>total solved</span>

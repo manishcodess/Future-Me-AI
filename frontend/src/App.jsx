@@ -143,7 +143,8 @@ function App() {
       />
       
       <LeftPanel 
-        isPanelOpen={isPanelOpen} 
+        isPanelOpen={isPanelOpen}
+        setIsPanelOpen={setIsPanelOpen}
         githubData={githubData} 
         leetcodeData={leetcodeData} 
         gfgData={gfgData} 
@@ -151,9 +152,6 @@ function App() {
       />
 
       <main className="main-content" style={{ position: 'relative' }}>
-        <button onClick={() => setIsPanelOpen(!isPanelOpen)} style={{ position: 'absolute', top: '24px', left: '24px', background: 'var(--surface-1)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px', zIndex: 10, transition: 'all 0.2s ease' }}>
-          <Menu size={20} />
-        </button>
         <div className="app-container">
           <div className="tabs-container">
              <button className={`tab-btn ${activeTab === 'chat' ? 'active' : ''}`} onClick={() => setActiveTab('chat')}>💬 Coach Chat <span style={{fontSize:'10px', opacity:0.5, marginLeft:'4px'}}>Ctrl+K</span></button>

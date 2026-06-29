@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Code2, User, ArrowRight, Save } from 'lucide-react';
+import { Code2, User, ArrowRight, Save, MessageSquare } from 'lucide-react';
 
 export default function Onboarding({ onComplete }) {
   const [formData, setFormData] = useState({
     github: '',
-    leetcode: ''
+    leetcode: '',
+    bio: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -28,7 +29,8 @@ export default function Onboarding({ onComplete }) {
         },
         body: JSON.stringify({
           githubUsername: formData.github,
-          leetcodeUsername: formData.leetcode
+          leetcodeUsername: formData.leetcode,
+          bio: formData.bio
         })
       });
 
@@ -89,6 +91,18 @@ export default function Onboarding({ onComplete }) {
               value={formData.leetcode}
               onChange={handleChange}
               required
+            />
+          </div>
+
+          <div className="input-group" style={{ alignItems: 'flex-start' }}>
+            <MessageSquare className="input-icon" size={18} style={{ marginTop: '14px' }} />
+            <textarea 
+              name="bio"
+              placeholder="Tell me about yourself (Optional). E.g. 'I am a backend dev trying to learn React...'" 
+              className="auth-input"
+              value={formData.bio}
+              onChange={handleChange}
+              style={{ minHeight: '80px', resize: 'vertical', paddingTop: '12px' }}
             />
           </div>
 

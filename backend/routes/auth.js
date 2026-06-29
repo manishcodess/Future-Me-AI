@@ -39,7 +39,8 @@ router.post('/signup', async (req, res) => {
         name: newUser.name,
         email: newUser.email,
         github: newUser.githubUsername,
-        leetcode: newUser.leetcodeUsername
+        leetcode: newUser.leetcodeUsername,
+        bio: newUser.bio
       }
     });
   } catch (error) {
@@ -66,7 +67,8 @@ router.post('/login', async (req, res) => {
         name: user.name,
         email: user.email,
         github: user.githubUsername,
-        leetcode: user.leetcodeUsername
+        leetcode: user.leetcodeUsername,
+        bio: user.bio
       }
     });
   } catch (error) {
@@ -77,12 +79,13 @@ router.post('/login', async (req, res) => {
 // Update Profiles (Onboarding)
 router.post('/onboard', verifyToken, async (req, res) => {
   try {
-    const { githubUsername, leetcodeUsername } = req.body;
+    const { githubUsername, leetcodeUsername, bio } = req.body;
     const user = await User.findById(req.userId);
     if (!user) return res.status(404).json({ error: "User not found" });
 
     user.githubUsername = githubUsername;
     user.leetcodeUsername = leetcodeUsername;
+    if (bio !== undefined) user.bio = bio;
     await user.save();
 
     res.json({
@@ -92,7 +95,8 @@ router.post('/onboard', verifyToken, async (req, res) => {
         name: user.name,
         email: user.email,
         github: user.githubUsername,
-        leetcode: user.leetcodeUsername
+        leetcode: user.leetcodeUsername,
+        bio: user.bio
       }
     });
   } catch (error) {
@@ -112,7 +116,8 @@ router.get('/me', verifyToken, async (req, res) => {
         name: user.name,
         email: user.email,
         github: user.githubUsername,
-        leetcode: user.leetcodeUsername
+        leetcode: user.leetcodeUsername,
+        bio: user.bio
       }
     });
   } catch (error) {

@@ -81,7 +81,7 @@ export default function ChatInterface({
       </main>
 
       <div className="input-area">
-        <form className="input-container" onSubmit={handleSubmit}>
+        <form className="input-form" onSubmit={handleSubmit}>
           <input
             type="text"
             className="input-field"
