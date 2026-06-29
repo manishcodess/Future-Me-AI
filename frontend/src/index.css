@@ -219,10 +219,10 @@ body {
 
 /* AI Message */
 .message.ai {
-  background-color: transparent;
+  background-color: var(--surface-1);
   color: var(--text-primary);
-  border: none;
-  padding: 0.8rem 0;
+  border: 1px solid var(--border-subtle);
+  padding: 0.8rem 1.25rem;
   line-height: 1.7;
 }
 
@@ -361,28 +361,32 @@ body {
 }
 
 .send-btn {
-  background: var(--text-primary);
+  background: linear-gradient(135deg, #ffffff, #d4d4d4);
   color: var(--bg-primary);
   border: none;
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.1);
 }
 
 .send-btn:hover:not(:disabled) {
-  opacity: 0.8;
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 14px rgba(255, 255, 255, 0.2);
 }
 
 .send-btn:disabled {
   background: var(--surface-2);
   color: var(--text-muted);
   cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
 }
 
 /* Sidebar Left Panel Content */
@@ -390,24 +394,30 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px;
+  padding: 20px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 8px;
 }
 .logo-icon-bg {
-  background: var(--text-primary);
-  border-radius: 6px;
-  width: 28px;
-  height: 28px;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
 }
 .logo-icon-bg svg {
-  color: var(--bg-primary) !important;
+  color: #ffffff !important;
 }
 .logo-text {
-  color: var(--text-primary);
-  font-weight: 500;
-  font-size: 16px;
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: -0.5px;
+  background: linear-gradient(90deg, #ffffff, #a5b4fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .user-profile-card {
@@ -581,15 +591,17 @@ body {
 }
 
 .ai-brief-card {
-  background: transparent;
-  padding: 0;
+  background: rgb(82, 82, 82);
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
   display: flex;
   gap: 12px;
   margin-bottom: 24px;
 }
 
 .brief-bot-icon {
-  background: var(--surface-1);
+  background: var(--surface-2);
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -617,10 +629,27 @@ body {
 }
 
 .shimmer-loader {
-  background: var(--surface-1);
   height: 20px;
   border-radius: 4px;
   width: 100%;
+  background: var(--surface-1);
+  background: linear-gradient(
+    90deg,
+    var(--surface-1) 25%,
+    var(--surface-2) 50%,
+    var(--surface-1) 75%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* Developer Stats Grid */

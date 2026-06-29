@@ -91,22 +91,31 @@ function App() {
     const file = e.target.files[0];
     if(!file) return;
     
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      const text = event.target.result;
-      await analyzeResume(text);
-    };
-    reader.readAsText(file);
+    if (file.type === "application/pdf") {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const base64Data = event.target.result.split(',')[1];
+        await analyzeResume("", base64Data);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const text = event.target.result;
+        await analyzeResume(text, null);
+      };
+      reader.readAsText(file);
+    }
   };
 
-  const analyzeResume = async (text) => {
+  const analyzeResume = async (text, pdfBase64 = null) => {
     setResumeLoading(true);
     setResumeAnalysis("");
     try {
-      const prompt = `You are a senior tech recruiter at a top product company.
-      Analyze this resume for a fresher SDE role targeting 20+ LPA:
+      const promptText = `You are a senior tech recruiter at a top product company.
+      Analyze this resume for a fresher SDE role targeting 20+ LPA: and anlyse whole info like where he sutdied which sem every minute details
       
-      ${text.slice(0, 3000)}
+      ${text ? text.slice(0, 3000) : 'See attached PDF.'}
       
       Give feedback in exactly this format:
       SCORE: X/10
@@ -116,16 +125,24 @@ function App() {
       
       WEAK POINTS (3 bullet points):
       - 
-      
-      MISSING KEYWORDS (comma separated, max 8):
+      MISSING KEYWORDS (comma separated, max 8):if have that only otherise dont mention in response
       
       ONE LINE VERDICT:
+      be good and answer like its your younger bro and suggeste things that are achievable and doable`;
       
-      Be harsh but constructive. Focus on what a recruiter actually looks for.`;
-      
+      const parts = [{ text: promptText }];
+      if (pdfBase64) {
+        parts.unshift({
+          inlineData: {
+            data: pdfBase64,
+            mimeType: "application/pdf"
+          }
+        });
+      }
+
       const result = await ai.models.generateContent({
         model: "gemini-3.1-flash-lite",
-        contents: prompt
+        contents: parts
       });
       
       setResumeAnalysis(result.text);
@@ -322,15 +339,15 @@ function App() {
 
     const generateDailyBrief = async (ghData, lcData) => {
       try {
-        const prompt = `You are a tough, humorous AI developer coach for Manish. Based on his recent activity:
+        const prompt = `You are a good, helping AI developer coach for Manish. Based on his recent activity:
    - GitHub Commits Today: ${ghData?.todayCommits || 0}
    - GitHub Commits Yesterday: ${ghData?.yesterdayCommits || 0}
-   - Total DSA Questions: ${lcData?.total ?? 'unknown'}
-   
+   - Total DSA Questions: ${lcData?.total ?? 'unknown'} on leetcode+110 on gfg
+   when tell total dsa q tell sum of leetcode+gfg both
    Give a brief status report about his consistency. DO NOT suggest what he should do today or give him advice.
    ONLY tell him if he is "consistent", "improving", or "inconsistent" based on today and yesterday's stats. Mention the exact commit/DSA numbers for those two days.
-   If he didn't do any GitHub commits or DSA questions in BOTH days, roast him with humorous criticism (e.g. "Are we building a startup or taking a nap?"). 
-   Maintain a strict, humorous tone. Max 40 words. No emojis.`;
+   If he didn't do any GitHub commits or DSA questions in BOTH days,() i know u are tired but its imp time like this). 
+    Max 40 words. No emojis.`;
 
         const response = await ai.models.generateContent({
           model: "gemini-3.1-flash-lite",
@@ -486,7 +503,13 @@ function App() {
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>Current Streak</span>
-                    <span style={{ fontSize: '14px', fontWeight: 'bold' }}>🔥 {githubData.streak}</span>
+                    <span style={{ 
+                      fontSize: Number(githubData.streak) > 0 ? '14px' : '12px', 
+                      fontWeight: Number(githubData.streak) > 0 ? 'bold' : 'normal',
+                      color: Number(githubData.streak) > 0 ? 'inherit' : 'var(--text-muted)'
+                    }}>
+                      {Number(githubData.streak) > 0 ? `🔥 ${githubData.streak}` : "Start your streak today!"}
+                    </span>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>Languages</span>
@@ -603,7 +626,7 @@ function App() {
                     placeholder="Ask your future self..."
                     disabled={isLoading}
                   />
-                  <button type="submit" disabled={!input.trim() || isLoading}>
+                  <button type="submit" className="send-btn" disabled={!input.trim() || isLoading}>
                     <Send size={18} />
                   </button>
                 </form>
