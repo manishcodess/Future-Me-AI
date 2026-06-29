@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Code2, User, ArrowRight, Save, MessageSquare } from 'lucide-react';
+import { Code2, User, ArrowRight, Save, MessageSquare, FileText } from 'lucide-react';
+import { ai } from '../../services/aiService';
+import { readFileAsBase64, readFileAsText } from '../../utils/file';
 
 export default function Onboarding({ onComplete }) {
   const [formData, setFormData] = useState({
@@ -7,7 +9,9 @@ export default function Onboarding({ onComplete }) {
     leetcode: '',
     bio: ''
   });
+  const [resumeFile, setResumeFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadingText, setLoadingText] = useState("");
   const [error, setError] = useState(null);
 
   const handleChange = (e) => {
@@ -17,9 +21,51 @@ export default function Onboarding({ onComplete }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setLoadingText("Saving profile...");
     setError(null);
 
+    let generatedResumeContext = undefined;
+
     try {
+      if (resumeFile) {
+        setLoadingText("Analyzing resume via AI...");
+        const promptText = `You are a senior tech recruiter at a top product company.
+      Analyze this resume for a Software Engineering role. Analyze the full profile including education, experience, and projects.
+      
+      ${resumeFile.type !== "application/pdf" ? (await readFileAsText(resumeFile)).slice(0, 3000) : 'See attached PDF.'}
+      
+      Give feedback in exactly this format:
+      SCORE: X/10
+      
+      STRONG POINTS (3 bullet points):
+      - 
+      
+      WEAK POINTS (3 bullet points):
+      - 
+      MISSING KEYWORDS (comma separated, max 8):if have that only otherise dont mention in response
+      
+      ONE LINE VERDICT:
+      be good and answer like its your younger bro and suggeste things that are achievable and doable`;
+        
+        const parts = [{ text: promptText }];
+        if (resumeFile.type === "application/pdf") {
+          const pdfBase64 = await readFileAsBase64(resumeFile);
+          parts.unshift({
+            inlineData: {
+              data: pdfBase64,
+              mimeType: "application/pdf"
+            }
+          });
+        }
+
+        const result = await ai.models.generateContent({
+          model: "gemini-3.1-flash-lite",
+          contents: parts
+        });
+        generatedResumeContext = result.text;
+      }
+
+      setLoadingText("Finalizing setup...");
       const token = localStorage.getItem('devpulse_token');
       const response = await fetch('http://localhost:3001/api/auth/onboard', {
         method: 'POST',
@@ -30,7 +76,8 @@ export default function Onboarding({ onComplete }) {
         body: JSON.stringify({
           githubUsername: formData.github,
           leetcodeUsername: formData.leetcode,
-          bio: formData.bio
+          bio: formData.bio,
+          resumeContext: generatedResumeContext
         })
       });
 
@@ -39,9 +86,11 @@ export default function Onboarding({ onComplete }) {
 
       onComplete(data.user);
     } catch (err) {
-      setError(err.message);
+      console.error(err);
+      setError(err.message || "Something went wrong during onboarding.");
     } finally {
       setIsSubmitting(false);
+      setLoadingText("");
     }
   };
 
@@ -106,6 +155,17 @@ export default function Onboarding({ onComplete }) {
             />
           </div>
 
+          <div className="input-group">
+            <FileText className="input-icon" size={18} />
+            <input 
+              type="file" 
+              accept=".pdf,.txt"
+              className="auth-input"
+              onChange={(e) => setResumeFile(e.target.files[0])}
+              style={{ padding: '12px 16px 12px 44px', color: resumeFile ? '#fff' : '#71717a' }}
+            />
+          </div>
+
           <button 
             type="submit" 
             className={`auth-submit-btn ${isSubmitting ? 'loading' : ''}`}
@@ -113,7 +173,10 @@ export default function Onboarding({ onComplete }) {
             style={{ background: 'linear-gradient(135deg, #10b981, #059669)', marginTop: '16px' }}
           >
             {isSubmitting ? (
-              <div className="auth-spinner"></div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div className="auth-spinner"></div>
+                <span style={{ fontSize: '14px' }}>{loadingText}</span>
+              </div>
             ) : (
               <>
                 Save & Continue

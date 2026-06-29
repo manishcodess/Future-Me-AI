@@ -18,10 +18,6 @@ export function buildSystemPrompt(githubData, leetcodeData, gfgData, userCredent
     Overall Coding Score: ${gfgData?.score ?? '?'}
   - GitHub: ${githubData?.weeklyCommits ?? 'unknown'} commits this week
     Public repos: ${githubData?.publicRepos ?? '?'}
-  - Goal: Land a 20+ LPA SDE role by 2026
-  - College: IIIT Bhagalpur, Mechatronics branch (non-CS)
-  - Skills: MERN stack, DSA in C++, Redis, Socket.IO, WebRTC, GenAI
-  - Weak areas: Trees, Dynamic Programming, System Design
   
   YOUR BEHAVIOR:
   - Talk like a senior developer mentor, not a chatbot

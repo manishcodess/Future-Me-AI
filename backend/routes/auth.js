@@ -81,13 +81,14 @@ router.post('/login', async (req, res) => {
 // Update Profiles (Onboarding)
 router.post('/onboard', verifyToken, async (req, res) => {
   try {
-    const { githubUsername, leetcodeUsername, bio } = req.body;
+    const { githubUsername, leetcodeUsername, bio, resumeContext } = req.body;
     const user = await User.findById(req.userId);
     if (!user) return res.status(404).json({ error: "User not found" });
 
     user.githubUsername = githubUsername;
     user.leetcodeUsername = leetcodeUsername;
     if (bio !== undefined) user.bio = bio;
+    if (resumeContext !== undefined) user.resumeContext = resumeContext;
     await user.save();
 
     res.json({

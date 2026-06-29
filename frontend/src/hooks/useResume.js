@@ -12,7 +12,7 @@ export function useResume(showToast, userCredentials, setUserCredentials) {
     setResumeAnalysis("");
     try {
       const promptText = `You are a senior tech recruiter at a top product company.
-      Analyze this resume for a fresher SDE role targeting 20+ LPA: and anlyse whole info like where he sutdied which sem every minute details
+      Analyze this resume for a Software Engineering role. Analyze the full profile including education, experience, and projects.
       
       ${text ? text.slice(0, 3000) : 'See attached PDF.'}
       
