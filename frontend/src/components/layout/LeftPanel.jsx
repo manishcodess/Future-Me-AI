@@ -1,0 +1,93 @@
+import React from 'react';
+import { Zap, ExternalLink } from 'lucide-react';
+
+export default function LeftPanel({ isPanelOpen, githubData, leetcodeData, gfgData }) {
+  return (
+    <aside className={`left-panel ${!isPanelOpen ? 'closed' : ''}`}>
+      <div className="sidebar-logo-container">
+        <div className="logo-icon-bg">
+          <Zap size={20} color="#ffffff" />
+        </div>
+        <span className="logo-text">DevPulse</span>
+      </div>
+
+      <div className="user-profile-card">
+        {githubData?.avatarUrl ? (
+          <img src={githubData.avatarUrl} alt="avatar" style={{width: 40, height: 40, borderRadius: '50%'}} />
+        ) : (
+          <div className="user-avatar">M</div>
+        )}
+        <div className="user-info">
+          <span className="user-name">{githubData?.username || "Manish"}</span>
+          <span className="user-role">Full Stack Developer</span>
+          <div className="user-status-container">
+            <div className="status-dot"></div>
+            <span className="status-text">Online</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="sidebar-content">
+        <div className="integration-card">
+          <div className="card-header">
+            <span className="card-label">GITHUB STATS</span>
+            <a href={`https://github.com/${githubData?.username || 'manishcodess'}`} target="_blank" rel="noreferrer" style={{ color: 'var(--text-muted)' }}>
+              <ExternalLink size={14} />
+            </a>
+          </div>
+          
+          {!githubData ? (
+            <div className="shimmer-loader" style={{ height: '40px', marginTop: '8px' }}></div>
+          ) : (
+            <>
+              <div className="dev-stats-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px 12px', marginTop: '16px', marginBottom: '8px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>Commits</span>
+                  <span style={{ fontSize: '14px', fontWeight: 'bold' }}>{githubData.totalCommits}</span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>Repositories</span>
+                  <span style={{ fontSize: '14px', fontWeight: 'bold' }}>{githubData.publicRepos}</span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>Current Streak</span>
+                  <span style={{ 
+                    fontSize: Number(githubData.streak) > 0 ? '14px' : '12px', 
+                    fontWeight: Number(githubData.streak) > 0 ? 'bold' : 'normal',
+                    color: Number(githubData.streak) > 0 ? 'inherit' : 'var(--text-muted)'
+                  }}>
+                    {Number(githubData.streak) > 0 ? `🔥 ${githubData.streak}` : "Start your streak today!"}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>Languages</span>
+                  <span style={{ fontSize: '12px', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{githubData.languages?.join(', ') || '--'}</span>
+                </div>
+              </div>
+              <div style={{ color: 'var(--text-muted)', fontSize: '10px', marginTop: '12px' }}>Last updated: just now</div>
+            </>
+          )}
+        </div>
+
+        <div className="integration-card">
+          <div className="card-header">
+            <span className="card-label">PROBLEM SOLVING</span>
+          </div>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+              <span style={{ fontSize: '28px', fontWeight: 'bold', color: 'var(--text-primary)', letterSpacing: '-1px' }}>
+                {(leetcodeData?.total ?? 0) + (gfgData?.total ?? 0)}
+              </span>
+              <span style={{ fontSize: '14px', color: 'var(--text-muted)' }}>total solved</span>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '4px' }}>
+              <span className="pill">LeetCode: {leetcodeData?.total ?? 0}</span>
+              <span className="pill">GFG: {gfgData?.total ?? 0}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  );
+}

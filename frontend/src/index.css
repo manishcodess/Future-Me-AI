@@ -90,6 +90,12 @@ body {
   border-left: 1px solid var(--border-color);
 }
 
+@media (max-width: 1024px) {
+  .right-panel {
+    display: none;
+  }
+}
+
 .main-content {
   flex: 1;
   background-color: var(--bg-primary);
