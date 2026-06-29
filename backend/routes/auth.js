@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { z } = require('zod');
 const User = require('../models/User');
 
 const router = express.Router();
@@ -78,10 +79,19 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// Zod Schema for Onboarding
+const onboardSchema = z.object({
+  githubUsername: z.string().max(100).optional(),
+  leetcodeUsername: z.string().max(100).optional(),
+  bio: z.string().max(500).optional(),
+  resumeContext: z.string().max(10000).optional()
+});
+
 // Update Profiles (Onboarding)
 router.post('/onboard', verifyToken, async (req, res) => {
   try {
-    const { githubUsername, leetcodeUsername, bio, resumeContext } = req.body;
+    const validatedData = onboardSchema.parse(req.body);
+    const { githubUsername, leetcodeUsername, bio, resumeContext } = validatedData;
     const user = await User.findById(req.userId);
     if (!user) return res.status(404).json({ error: "User not found" });
 
@@ -104,6 +114,9 @@ router.post('/onboard', verifyToken, async (req, res) => {
       }
     });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: "Validation failed", details: error.errors });
+    }
     res.status(500).json({ error: error.message });
   }
 });
@@ -130,10 +143,16 @@ router.get('/me', verifyToken, async (req, res) => {
   }
 });
 
+// Zod Schema for Resume
+const resumeSchema = z.object({
+  resumeContext: z.string().max(10000)
+});
+
 // Update Resume Context
 router.post('/resume', verifyToken, async (req, res) => {
   try {
-    const { resumeContext } = req.body;
+    const validatedData = resumeSchema.parse(req.body);
+    const { resumeContext } = validatedData;
     const user = await User.findById(req.userId);
     if (!user) return res.status(404).json({ error: "User not found" });
 
@@ -153,6 +172,9 @@ router.post('/resume', verifyToken, async (req, res) => {
       }
     });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: "Validation failed", details: error.errors });
+    }
     res.status(500).json({ error: error.message });
   }
 });
