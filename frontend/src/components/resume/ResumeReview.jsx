@@ -1,5 +1,16 @@
 import React from 'react';
 
+const formatText = (text) => {
+  if (!text) return text;
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i}>{part.slice(2, -2)}</strong>;
+    }
+    return part;
+  });
+};
+
 export default function ResumeReview({
   fileInputRef,
   handleResumeUpload,
@@ -35,11 +46,11 @@ export default function ResumeReview({
         <div className="resume-feedback-grid">
           <div className="feedback-card strong">
             <h3>Strong Points</h3>
-            <ul>{strongPoints.map((p,i)=><li key={i}>{p.replace('-','').trim()}</li>)}</ul>
+            <ul style={{ fontSize: '13.5px', lineHeight: 1.5 }}>{strongPoints.map((p,i)=><li key={i} style={{ marginBottom: '6px' }}>{formatText(p.replace('-','').trim())}</li>)}</ul>
           </div>
           <div className="feedback-card weak">
             <h3>Areas to Improve</h3>
-            <ul>{weakPoints.map((p,i)=><li key={i}>{p.replace('-','').trim()}</li>)}</ul>
+            <ul style={{ fontSize: '13.5px', lineHeight: 1.5 }}>{weakPoints.map((p,i)=><li key={i} style={{ marginBottom: '6px' }}>{formatText(p.replace('-','').trim())}</li>)}</ul>
           </div>
         </div>
 
@@ -53,8 +64,8 @@ export default function ResumeReview({
         )}
 
         {verdict && (
-          <div className="resume-verdict-box">
-            <strong>Verdict:</strong> {verdict}
+          <div className="resume-verdict-box" style={{ fontSize: '14px', lineHeight: 1.5 }}>
+            <strong>Verdict:</strong> {formatText(verdict)}
           </div>
         )}
       </div>

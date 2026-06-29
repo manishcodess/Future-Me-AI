@@ -40,7 +40,8 @@ router.post('/signup', async (req, res) => {
         email: newUser.email,
         github: newUser.githubUsername,
         leetcode: newUser.leetcodeUsername,
-        bio: newUser.bio
+        bio: newUser.bio,
+        resumeContext: newUser.resumeContext
       }
     });
   } catch (error) {
@@ -68,7 +69,8 @@ router.post('/login', async (req, res) => {
         email: user.email,
         github: user.githubUsername,
         leetcode: user.leetcodeUsername,
-        bio: user.bio
+        bio: user.bio,
+        resumeContext: user.resumeContext
       }
     });
   } catch (error) {
@@ -96,7 +98,8 @@ router.post('/onboard', verifyToken, async (req, res) => {
         email: user.email,
         github: user.githubUsername,
         leetcode: user.leetcodeUsername,
-        bio: user.bio
+        bio: user.bio,
+        resumeContext: user.resumeContext
       }
     });
   } catch (error) {
@@ -117,7 +120,35 @@ router.get('/me', verifyToken, async (req, res) => {
         email: user.email,
         github: user.githubUsername,
         leetcode: user.leetcodeUsername,
-        bio: user.bio
+        bio: user.bio,
+        resumeContext: user.resumeContext
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update Resume Context
+router.post('/resume', verifyToken, async (req, res) => {
+  try {
+    const { resumeContext } = req.body;
+    const user = await User.findById(req.userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    user.resumeContext = resumeContext;
+    await user.save();
+
+    res.json({
+      success: true,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        github: user.githubUsername,
+        leetcode: user.leetcodeUsername,
+        bio: user.bio,
+        resumeContext: user.resumeContext
       }
     });
   } catch (error) {

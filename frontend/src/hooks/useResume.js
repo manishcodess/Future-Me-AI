@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { ai } from '../services/aiService';
 import { readFileAsBase64, readFileAsText } from '../utils/file';
 
-export function useResume(showToast) {
+export function useResume(showToast, userCredentials, setUserCredentials) {
   const [resumeAnalysis, setResumeAnalysis] = useState("");
   const [resumeLoading, setResumeLoading] = useState(false);
   const fileInputRef = useRef(null);
@@ -44,8 +44,33 @@ export function useResume(showToast) {
         contents: parts
       });
       
-      setResumeAnalysis(result.text);
-      showToast("Resume analyzed ✓");
+      const analysisText = result.text;
+      setResumeAnalysis(analysisText);
+      showToast("Resume analyzed ✨");
+
+      // Save to DB for context injection
+      if (userCredentials) {
+        const token = localStorage.getItem('devpulse_token');
+        if (token) {
+          try {
+            const res = await fetch('http://localhost:3001/api/auth/resume', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({ resumeContext: analysisText })
+            });
+            const data = await res.json();
+            if (data.success) {
+              setUserCredentials(data.user);
+            }
+          } catch (err) {
+            console.error("Failed to save resume context", err);
+          }
+        }
+      }
+
     } catch {
       setResumeAnalysis("SCORE: 0/10\n\nONE LINE VERDICT: Failed to analyze resume.");
       showToast("Failed to analyze resume", "error");

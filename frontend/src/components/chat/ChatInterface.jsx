@@ -88,7 +88,7 @@ export default function ChatInterface({
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask your future self..."
+            placeholder="Ask Something..."
             disabled={isLoading || isStreaming}
           />
           <button type="submit" className="send-btn" disabled={!input.trim() || isLoading || isStreaming}>

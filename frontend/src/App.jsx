@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Menu } from 'lucide-react';
+import { Menu, Zap } from 'lucide-react';
 import { useDevData } from './hooks/useDevData';
 import { useChat } from './hooks/useChat';
 import { useResume } from './hooks/useResume';
@@ -76,7 +76,7 @@ function App() {
     resumeLoading,
     fileInputRef,
     handleResumeUpload
-  } = useResume(showToast);
+  } = useResume(showToast, userCredentials, setUserCredentials);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -150,6 +150,18 @@ function App() {
         gfgData={gfgData} 
         userCredentials={userCredentials}
       />
+
+      <div className="mobile-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div className="logo-icon-bg" style={{ width: '32px', height: '32px', borderRadius: '8px' }}>
+            <Zap size={16} color="#ffffff" />
+          </div>
+          <span style={{ fontSize: '18px', fontWeight: 'bold' }}>DevPulse</span>
+        </div>
+        <button onClick={() => setIsPanelOpen(true)} className="mobile-menu-btn">
+          <Menu size={24} />
+        </button>
+      </div>
 
       <main className="main-content" style={{ position: 'relative' }}>
         <div className="app-container">
