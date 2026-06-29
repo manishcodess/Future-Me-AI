@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Menu, Zap } from 'lucide-react';
 import { useDevData } from './hooks/useDevData';
 import { useChat } from './hooks/useChat';
+import { API_BASE_URL } from './config';
 import { useResume } from './hooks/useResume';
 import Toast from './components/layout/Toast';
 import LeftPanel from './components/layout/LeftPanel';
@@ -28,7 +29,7 @@ function App() {
   useEffect(() => {
     const token = localStorage.getItem('devpulse_token');
     if (token) {
-      fetch('http://localhost:3001/api/auth/me', {
+      fetch(`${API_BASE_URL}/auth/me`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
       .then(res => res.json())

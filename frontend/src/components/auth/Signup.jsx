@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Zap, Mail, Lock, User, ArrowRight } from 'lucide-react';
+import { API_BASE_URL } from '../../config';
 
 export default function Signup({ onSignup, onSwitchToLogin }) {
   const [formData, setFormData] = useState({
@@ -20,7 +21,7 @@ export default function Signup({ onSignup, onSwitchToLogin }) {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:3001/api/auth/signup', {
+      const response = await fetch(`${API_BASE_URL}/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)

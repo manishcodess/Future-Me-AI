@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
-import { ai } from '../services/aiService';
+import { generateAIContent } from '../services/aiService';
 import { readFileAsBase64, readFileAsText } from '../utils/file';
+import { API_BASE_URL } from '../config';
 
 export function useResume(showToast, userCredentials, setUserCredentials) {
   const [resumeAnalysis, setResumeAnalysis] = useState("");
@@ -39,12 +40,7 @@ export function useResume(showToast, userCredentials, setUserCredentials) {
         });
       }
 
-      const result = await ai.models.generateContent({
-        model: "gemini-3.1-flash-lite",
-        contents: parts
-      });
-      
-      const analysisText = result.text;
+      const analysisText = await generateAIContent(parts);
       setResumeAnalysis(analysisText);
       showToast("Resume analyzed ✨");
 
@@ -53,7 +49,7 @@ export function useResume(showToast, userCredentials, setUserCredentials) {
         const token = localStorage.getItem('devpulse_token');
         if (token) {
           try {
-            const res = await fetch('http://localhost:3001/api/auth/resume', {
+            const res = await fetch(`${API_BASE_URL}/auth/resume`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

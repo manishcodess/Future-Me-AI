@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { ai, buildSystemPrompt } from '../services/aiService';
+import { streamAIChat, buildSystemPrompt } from '../services/aiService';
 
 export function useChat(githubData, leetcodeData, gfgData, userCredentials) {
   const userName = userCredentials?.name?.split(' ')[0] || "User";
@@ -30,44 +30,57 @@ export function useChat(githubData, leetcodeData, gfgData, userCredentials) {
     setIsLoading(true);
 
     try {
-      const responseStream = await ai.models.generateContentStream({
-        model: "gemini-3.1-flash-lite",
-        contents: userMessage,
-        config: {
-          systemInstruction: buildSystemPrompt(githubData, leetcodeData, gfgData, userCredentials),
-        },
-      });
-
+      const systemInstruction = buildSystemPrompt(githubData, leetcodeData, gfgData, userCredentials);
+      const stream = await streamAIChat(userMessage, systemInstruction);
+      
       let fullText = '';
       let isFirstChunk = true;
       const aiTimestamp = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
 
-      for await (const chunk of responseStream) {
-        if (isFirstChunk) {
-          setIsLoading(false);
-          setIsStreaming(true);
-          isFirstChunk = false;
-          setMessages((prev) => [
-            ...prev,
-            { role: 'ai', content: '', timestamp: aiTimestamp }
-          ]);
-        }
+      const reader = stream.getReader();
+      const decoder = new TextDecoder('utf-8');
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
         
-        const text = chunk.text;
-        for (let i = 0; i < text.length; i++) {
-          fullText += text[i];
-          setMessages((prev) => {
-            const newMessages = [...prev];
-            newMessages[newMessages.length - 1] = { 
-              ...newMessages[newMessages.length - 1],
-              content: fullText 
-            };
-            return newMessages;
-          });
-          // 15ms delay per character for a "medium" reading speed
-          await new Promise(r => setTimeout(r, 15));
+        const chunkStr = decoder.decode(value, { stream: true });
+        const lines = chunkStr.split('\n');
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+            try {
+              const parsed = JSON.parse(line.slice(6));
+              if (parsed.text) {
+                if (isFirstChunk) {
+                  setIsLoading(false);
+                  setIsStreaming(true);
+                  isFirstChunk = false;
+                  setMessages((prev) => [
+                    ...prev,
+                    { role: 'ai', content: '', timestamp: aiTimestamp }
+                  ]);
+                }
+
+                const text = parsed.text;
+                for (let i = 0; i < text.length; i++) {
+                  fullText += text[i];
+                  setMessages((prev) => {
+                    const newMessages = [...prev];
+                    newMessages[newMessages.length - 1].content = fullText;
+                    return newMessages;
+                  });
+                  await new Promise(resolve => setTimeout(resolve, 5));
+                }
+              }
+            } catch (err) {
+              console.error("Error parsing SSE:", err);
+            }
+          }
         }
       }
+
+      setIsStreaming(false);
     } catch (error) {
       setMessages((prev) => [
         ...prev,

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Code2, User, ArrowRight, Save, MessageSquare, FileText } from 'lucide-react';
-import { ai } from '../../services/aiService';
+import { generateAIContent } from '../../services/aiService';
 import { readFileAsBase64, readFileAsText } from '../../utils/file';
+import { API_BASE_URL } from '../../config';
 
 export default function Onboarding({ onComplete }) {
   const [formData, setFormData] = useState({
@@ -58,16 +59,13 @@ export default function Onboarding({ onComplete }) {
           });
         }
 
-        const result = await ai.models.generateContent({
-          model: "gemini-3.1-flash-lite",
-          contents: parts
-        });
-        generatedResumeContext = result.text;
+        const generatedText = await generateAIContent(parts);
+        generatedResumeContext = generatedText;
       }
 
       setLoadingText("Finalizing setup...");
       const token = localStorage.getItem('devpulse_token');
-      const response = await fetch('http://localhost:3001/api/auth/onboard', {
+      const response = await fetch(`${API_BASE_URL}/auth/onboard`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

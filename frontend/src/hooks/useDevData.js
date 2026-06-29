@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { ai } from '../services/aiService';
+import { generateAIContent } from '../services/aiService';
 import { getCachedData, setCachedData } from '../utils/storage';
 import { getTodayString, getYesterdayString } from '../utils/date';
+import { API_BASE_URL } from '../config';
 
 export function useDevData(showToast, userCredentials = null) {
   const [githubData, setGithubData] = useState(null);
@@ -132,7 +133,7 @@ export function useDevData(showToast, userCredentials = null) {
           return null;
         }
 
-        const solvedRes = await fetch(`http://localhost:3001/api/leetcode/${username}`, { method: 'POST' });
+        const solvedRes = await fetch(`${API_BASE_URL}/leetcode/${username}`, { method: 'POST' });
         if (!solvedRes.ok) throw new Error("Leetcode API error");
         const solvedData = await solvedRes.json();
         
@@ -200,11 +201,8 @@ The response should feel like it was written specifically for this developer.
 
 Maximum 70 words.`;
 
-        const response = await ai.models.generateContent({
-          model: "gemini-3.1-flash-lite",
-          contents: prompt,
-        });
-        setDailyBrief(response.text);
+        const text = await generateAIContent(prompt);
+        setDailyBrief(text);
         showToast("Daily brief generated ✓");
       } catch {
         setDailyBrief("Ready to level up your skills today? Let's focus on the big picture.");

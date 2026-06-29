@@ -11,7 +11,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'devpulse_fallback_secret_123';
 const verifyToken = (req, res, next) => {
   const token = req.headers['authorization'];
   if (!token) return res.status(403).json({ error: "No token provided" });
-  
+
   jwt.verify(token.split(" ")[1], JWT_SECRET, (err, decoded) => {
     if (err) return res.status(401).json({ error: "Unauthorized" });
     req.userId = decoded.id;
@@ -31,9 +31,9 @@ router.post('/signup', async (req, res) => {
     await newUser.save();
 
     const token = jwt.sign({ id: newUser._id }, JWT_SECRET, { expiresIn: '7d' });
-    
-    res.json({ 
-      token, 
+
+    res.json({
+      token,
       user: {
         id: newUser._id,
         name: newUser.name,
@@ -61,8 +61,8 @@ router.post('/login', async (req, res) => {
 
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '7d' });
 
-    res.json({ 
-      token, 
+    res.json({
+      token,
       user: {
         id: user._id,
         name: user.name,

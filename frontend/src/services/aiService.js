@@ -1,6 +1,25 @@
-import { GoogleGenAI } from '@google/genai';
+import { API_BASE_URL } from '../config';
 
-export const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
+export async function generateAIContent(contents) {
+  const response = await fetch(`${API_BASE_URL}/ai/generate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ contents })
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || 'AI generation failed');
+  return data.text;
+}
+
+export async function streamAIChat(contents, systemInstruction) {
+  const response = await fetch(`${API_BASE_URL}/ai/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ contents, systemInstruction })
+  });
+  if (!response.ok) throw new Error('Chat stream failed');
+  return response.body;
+}
 
 export function buildSystemPrompt(githubData, leetcodeData, gfgData, userCredentials) {
   const userName = userCredentials?.name?.split(' ')[0] || "User";
