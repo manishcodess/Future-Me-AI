@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
-import { Zap, Github, Code2, Mail, Lock, User, ArrowRight } from 'lucide-react';
+import { Zap, Mail, Lock, ArrowRight } from 'lucide-react';
 
-export default function Signup({ onSignup, onSwitchToLogin }) {
+export default function Login({ onLogin, onSwitchToSignup }) {
   const [formData, setFormData] = useState({
-    name: '',
     email: '',
-    password: '',
-    github: '',
-    leetcode: ''
+    password: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -21,7 +18,13 @@ export default function Signup({ onSignup, onSwitchToLogin }) {
     // Simulate network delay for effect
     setTimeout(() => {
       setIsSubmitting(false);
-      onSignup(formData);
+      // For mockup purposes, pass the email as name and empty github/leetcode
+      onLogin({
+        name: formData.email.split('@')[0],
+        email: formData.email,
+        github: '',
+        leetcode: ''
+      });
     }, 1200);
   };
 
@@ -37,24 +40,11 @@ export default function Signup({ onSignup, onSwitchToLogin }) {
           <div className="auth-logo-bg">
             <Zap size={24} color="#ffffff" />
           </div>
-          <h1 className="auth-title">Welcome to DevPulse</h1>
-          <p className="auth-subtitle">Your AI developer coach is waiting. Let's get started.</p>
+          <h1 className="auth-title">Welcome Back</h1>
+          <p className="auth-subtitle">Log in to continue your developer journey.</p>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit}>
-          <div className="input-group">
-            <User className="input-icon" size={18} />
-            <input 
-              type="text" 
-              name="name"
-              placeholder="Full Name" 
-              className="auth-input"
-              value={formData.name}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
           <div className="input-group">
             <Mail className="input-icon" size={18} />
             <input 
@@ -81,35 +71,6 @@ export default function Signup({ onSignup, onSwitchToLogin }) {
             />
           </div>
 
-          <div className="auth-divider">
-            <span>Developer Profiles</span>
-          </div>
-
-          <div className="input-group">
-            <Github className="input-icon" size={18} />
-            <input 
-              type="text" 
-              name="github"
-              placeholder="GitHub Username" 
-              className="auth-input"
-              value={formData.github}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div className="input-group">
-            <Code2 className="input-icon" size={18} />
-            <input 
-              type="text" 
-              name="leetcode"
-              placeholder="LeetCode Username" 
-              className="auth-input"
-              value={formData.leetcode}
-              onChange={handleChange}
-            />
-          </div>
-
           <button 
             type="submit" 
             className={`auth-submit-btn ${isSubmitting ? 'loading' : ''}`}
@@ -119,7 +80,7 @@ export default function Signup({ onSignup, onSwitchToLogin }) {
               <div className="auth-spinner"></div>
             ) : (
               <>
-                Create Account
+                Log In
                 <ArrowRight size={18} className="btn-icon" />
               </>
             )}
@@ -127,7 +88,7 @@ export default function Signup({ onSignup, onSwitchToLogin }) {
         </form>
         
         <p className="auth-footer">
-          Already have an account? <span className="auth-link" onClick={onSwitchToLogin}>Log in</span>
+          Don't have an account? <span className="auth-link" onClick={onSwitchToSignup}>Sign up</span>
         </p>
       </div>
     </div>

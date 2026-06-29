@@ -9,9 +9,11 @@ import RightPanel from './components/layout/RightPanel';
 import ChatInterface from './components/chat/ChatInterface';
 import ResumeReview from './components/resume/ResumeReview';
 import Signup from './components/auth/Signup';
+import Login from './components/auth/Login';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authView, setAuthView] = useState('signup'); // 'signup' or 'login'
   const [userCredentials, setUserCredentials] = useState(null);
   const [activeTab, setActiveTab] = useState('chat');
   const [isPanelOpen, setIsPanelOpen] = useState(window.innerWidth > 768);
@@ -22,7 +24,7 @@ function App() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const handleSignup = (data) => {
+  const handleAuth = (data) => {
     setUserCredentials(data);
     setIsAuthenticated(true);
     showToast(`Welcome, ${data.name.split(' ')[0]}!`);
@@ -86,7 +88,11 @@ function App() {
     return (
       <>
         <Toast toast={toast} />
-        <Signup onSignup={handleSignup} />
+        {authView === 'signup' ? (
+          <Signup onSignup={handleAuth} onSwitchToLogin={() => setAuthView('login')} />
+        ) : (
+          <Login onLogin={handleAuth} onSwitchToSignup={() => setAuthView('signup')} />
+        )}
       </>
     );
   }
