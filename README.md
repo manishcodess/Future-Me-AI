@@ -1,51 +1,83 @@
-# DevPulse — Your AI Developer Coach
+# DevPulse
+> An AI mentor that tracks your real GitHub/LeetCode activity and coaches you like a senior engineer.
 
-DevPulse is an AI-powered developer mentor and dashboard designed to help you stay consistent, track your progress, and level up your skills. It provides real-time statistics from GitHub, LeetCode, and GeeksforGeeks, and offers personalized coaching using the Google Gemini AI.
+## Live Demo
+**[View Live Demo Here](#)**  
+*(Insert a 10-second GIF or screenshot here showing the streaming chat and dashboard loading)*
 
-## Features
-- **Real-Time Stats Tracking:** Fetches live data including your GitHub commits, current coding streak, top languages, and LeetCode problem-solving stats.
-- **AI Coach (Powered by Gemini):** Acts as a senior developer mentor to give actionable, personalized advice based on your current stats, weak areas, and career goals.
-- **AI Resume Reviewer:** Upload your resume for an instant, critical breakdown from a "senior tech recruiter" perspective, providing a score out of 10 and identifying missing keywords.
-- **Daily Briefs:** Generates quick, personalized morning briefs to set your focus for the day.
+## Why I Built This
+I wanted a developer dashboard that didn't just passively show stats, but actively used them to provide personalized mentorship. I deliberately skipped complex RAG (Retrieval-Augmented Generation) setups, opting instead for dynamic, real-time prompt generation to keep the architecture fast, lean, and highly personalized for each user.
 
-## Architecture & Tech Stack
-This project uses a decoupled Full-Stack architecture (JAMStack):
-- **Frontend (Vite + React):** Deployed on **Vercel**. Handles the beautiful, responsive UI, state management, and direct communication with the Gemini AI.
-- **Backend (Node.js + Express):** Deployed on **Render**. Acts as a proxy API to scrape GitHub stats and interact with LeetCode's GraphQL API without hitting CORS issues on the frontend.
+## Tech Stack
+| Frontend | Backend | Database | APIs |
+|----------|---------|----------|------|
+| React (Vite) | Node.js | MongoDB Atlas | Google Gemini (Flash-Lite) |
+| CSS Modules | Express | Mongoose | GitHub API |
+| Vercel | Render | node-cache | LeetCode GraphQL |
 
-## Local Setup & Development
+## Key Features
+- **Real-Time Git & LeetCode Tracking:** Live fetching of daily commits, current streaks, and solved DSA problems.
+- **AI Coach (Gemini):** A chat interface that streams responses token-by-token (SSE) acting as a senior mentor.
+- **Resume Reviewer:** Upload your resume for an instant, critical breakdown from a "senior tech recruiter" perspective.
+- **Daily Briefings:** Automatic generation of a motivational morning brief based strictly on your yesterday vs. today stats.
 
-### 1. Clone the repository
+## Architecture
+```text
+Frontend (Vercel)  →  Backend Proxy (Render)  →  External APIs
+(React + Hooks)       (Express + node-cache)     (GitHub, LeetCode, Gemini)
+                             ↓
+                      MongoDB (Atlas)
+```
+
+## ⚙️ Challenges & How I Solved Them
+
+**Challenge 1: LeetCode has no official public API**  
+LeetCode doesn't offer a documented REST API, so fetching solved-problem counts wasn't straightforward.  
+**Solution:** Reverse-engineered their internal GraphQL endpoint (used by their own frontend) and built a backend proxy to query it safely, avoiding CORS issues since it's called server-side, not from the browser.
+
+**Challenge 2: GitHub's 60 req/hr rate limit**  
+With multiple users refreshing dashboards, unauthenticated GitHub calls would get rate-limited fast.  
+**Solution:** Added a GitHub Personal Access Token (5,000 req/hr) plus a 1-hour `node-cache` layer, so repeated requests for the same user serve cached data instead of re-hitting GitHub every time.
+
+**Challenge 3: Chat responses felt slow / robotic**  
+A normal request-response chat meant users stared at a loading spinner for 5-10 seconds with zero feedback.  
+**Solution:** Implemented Server-Sent Events (SSE) so Gemini's response streams token-by-token, giving a real-time "typing" effect — drastically improved perceived speed without changing actual latency.
+
+**Challenge 4: Personalizing AI responses without RAG complexity**  
+Each user has GitHub/LeetCode/resume context, and naive RAG setups (vector DB, embeddings) felt like overkill for small per-user data.  
+**Solution:** Decided to dynamically generate a system prompt at request time, injecting real-time stats and resume context directly — simpler, faster, and fully justified since the data per user is small (a few hundred tokens), not large enough to need retrieval.
+
+**Challenge 5: Securing secrets while keeping CORS open enough for the frontend**  
+Needed the Gemini API key, GitHub token, and JWT secret hidden, but still let only my deployed frontend talk to the backend.  
+**Solution:** Stored all secrets in `.env` files (never committed), and locked CORS to a single `FRONTEND_URL` env variable instead of allowing all origins.
+
+## Setup Instructions
+
+### 1. Clone & Install
 ```bash
 git clone https://github.com/manishcodess/DevPulse.git
 cd DevPulse
-```
 
-### 2. Backend Setup
-The backend serves as a proxy for GitHub and LeetCode data.
-```bash
-# Install backend dependencies
+# Install backend
+cd backend
 npm install
 
-# Start the Express server (runs on port 3001)
+# Install frontend
+cd ../frontend
+npm install
+```
+
+### 2. Environment Variables
+Create `.env` in both `frontend` and `backend` using the provided `.env.example` templates.
+
+### 3. Run Locally
+Open two terminal windows:
+```bash
+# Terminal 1: Backend (runs on port 3001)
+cd backend
 npm start
-```
 
-### 3. Frontend Setup
-Open a new terminal window for the frontend.
-```bash
+# Terminal 2: Frontend (runs on port 5173)
 cd frontend
-
-# Install frontend dependencies
-npm install
-
-# Create a .env file and add your Gemini API Key
-echo VITE_GEMINI_API_KEY=your_api_key_here > .env
-
-# Start the Vite development server
 npm run dev
 ```
-
-## Deployment Notes
-- **Frontend:** Pushed to Vercel. Ensure `VITE_GEMINI_API_KEY` is added to your Vercel Environment Variables.
-- **Backend:** Pushed to Render as a Web Service using the `npm start` command. Ensure the frontend `fetch` URLs point to your live Render backend URL in production.

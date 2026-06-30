@@ -93,7 +93,7 @@ export function useDevData(showToast, userCredentials = null) {
 
     const generateDailyBrief = async (ghData, lcData) => {
       try {
-        const userName = userCredentials?.name?.split(' ')[0] || "User";
+        const userName = "Developer";
         const prompt = `You are DevPulse, an AI developer mentor.
 
 Generate today's Daily Brief for the user using ONLY the provided real-time data.
