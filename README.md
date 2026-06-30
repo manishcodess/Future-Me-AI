@@ -1,4 +1,6 @@
-# DevPulse
+<p align="center">
+  <img src="logo.png" alt="DevPulse Logo" width="400" />
+</p>
 > An AI mentor that tracks your real GitHub/LeetCode activity and coaches you like a senior engineer.
 
 ## Live Demo
