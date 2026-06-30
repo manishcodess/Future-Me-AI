@@ -153,15 +153,37 @@ export default function Onboarding({ onComplete }) {
             />
           </div>
 
-          <div className="input-group">
-            <FileText className="input-icon" size={18} />
+          <div className="input-group" style={{ position: 'relative', cursor: 'pointer' }}>
+            <FileText className="input-icon" size={18} style={{ zIndex: 2 }} />
             <input 
               type="file" 
               accept=".pdf,.txt"
-              className="auth-input"
               onChange={(e) => setResumeFile(e.target.files[0])}
-              style={{ padding: '12px 16px 12px 44px', color: resumeFile ? '#fff' : '#71717a' }}
+              style={{ 
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                opacity: 0,
+                cursor: 'pointer',
+                zIndex: 3
+              }}
+              title="Add Resume"
             />
+            <div 
+              className="auth-input" 
+              style={{ 
+                padding: '12px 16px 12px 44px', 
+                color: resumeFile ? '#fff' : '#71717a',
+                display: 'flex',
+                alignItems: 'center',
+                width: '100%',
+                boxSizing: 'border-box'
+              }}
+            >
+              {resumeFile ? resumeFile.name : "Add Resume"}
+            </div>
           </div>
 
           <button 
