@@ -75,13 +75,24 @@ app.post('/api/leetcode/:username', cacheMiddleware('leetcode'), async (req, res
 
     const response = await fetch('https://leetcode.com/graphql', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0',
+        'Referer': 'https://leetcode.com/'
+      },
       body: JSON.stringify({ query: LEETCODE_QUERY, variables: { username } })
     });
 
-    const data = await response.json();
+    const textData = await response.text();
+    let data;
+    try {
+      data = JSON.parse(textData);
+    } catch (parseError) {
+      console.warn("LeetCode returned non-JSON response");
+      return res.status(502).json({ error: "LeetCode API is currently unavailable or blocking requests" });
+    }
 
-    if (data.errors) {
+    if (data.errors || !data.data || !data.data.matchedUser) {
       return res.status(404).json({ error: "User not found" });
     }
 

@@ -96,6 +96,55 @@ router.post('/onboard', verifyToken, async (req, res) => {
   try {
     const validatedData = onboardSchema.parse(req.body);
     const { githubUsername, leetcodeUsername, bio, resumeContext } = validatedData;
+
+    // Validate GitHub username
+    if (githubUsername) {
+      try {
+        const ghCheck = await fetch(`https://api.github.com/users/${githubUsername}`, {
+          headers: { 'User-Agent': 'Future-Me-AI-App' }
+        });
+        if (ghCheck.status === 404) {
+          return res.status(400).json({ error: "GitHub username not found" });
+        }
+      } catch (err) {
+        return res.status(400).json({ error: "Failed to validate GitHub username due to network error." });
+      }
+    }
+
+    // Validate LeetCode username
+    if (leetcodeUsername) {
+      try {
+        const LEETCODE_QUERY = `
+          query getUserProfile($username: String!) {
+            matchedUser(username: $username) {
+              username
+            }
+          }
+        `;
+        const lcCheck = await fetch('https://leetcode.com/graphql', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'User-Agent': 'Mozilla/5.0',
+            'Referer': 'https://leetcode.com/'
+          },
+          body: JSON.stringify({ query: LEETCODE_QUERY, variables: { username: leetcodeUsername } })
+        });
+        
+        const lcText = await lcCheck.text();
+        try {
+          const lcData = JSON.parse(lcText);
+          if (lcData.errors || !lcData.data || !lcData.data.matchedUser) {
+            return res.status(400).json({ error: "LeetCode username not found" });
+          }
+        } catch (parseError) {
+          return res.status(400).json({ error: "Failed to validate LeetCode username (API blocked). Please try again later." });
+        }
+      } catch (err) {
+        return res.status(400).json({ error: "Failed to validate LeetCode username due to network error." });
+      }
+    }
+
     const user = await User.findById(req.userId);
     if (!user) return res.status(404).json({ error: "User not found" });
 
